@@ -4,7 +4,7 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-//using System.Data.SQLite;
+using System.Data.SQLite;
 using System.Data.Linq;
 using Discord;
 
