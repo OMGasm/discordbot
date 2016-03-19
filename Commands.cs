@@ -22,9 +22,13 @@ namespace discordbot
         internal static void init(CommandService _service)
         {
             service = _service;
+            CefSharp.Cef.Initialize(new CefSharp.CefSettings(), shutdownOnProcessExit: true, performDependencyCheck: true);
             commands.Add(new Sexymeter());
             commands.Add(new LoveMe());
             commands.Add(new Play());
+            commands.Add(new Draw());
+            commands.Add(new ChangeFont());
+            commands.Add(new Web());
         }
 
         internal static void addCommand(CommandBase command)

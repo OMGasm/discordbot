@@ -8,23 +8,22 @@ using Discord.Commands;
 
 namespace discordbot.commands
 {
-    class Play : CommandBase
+    class ChangeFont : CommandBase
     {
-        string game;
-
         public override async Task action(CommandEventArgs e)
         {
-            game = e.GetArg("game");
-            e.Channel.Client.SetGame(game);
-            e.Channel.Client.GatewaySocket.Connected += (s, ev) => e.Channel.Client.SetGame(game);
+            Console.WriteLine(e.GetArg("font"));
+            if(e.GetArg("font").Length > 1)
+            Draw.setFont(e.GetArg("font"));
             await Task.Yield();
         }
 
         public override bool permission(Command command, User user, Channel channel)
         {
+            Console.WriteLine($"{user.Id == 121183247022555137}");
             return user.Id == 121183247022555137;
         }
 
-        public Play() : base("play", "play a game", null, new KeyValuePair<string, ParameterType>[] { new KeyValuePair<string, ParameterType>("game", ParameterType.Unparsed) }) { }
+        public ChangeFont() : base("chfnt", parameters: new KeyValuePair<string, ParameterType>[] { new KeyValuePair<string, ParameterType>("font", ParameterType.Unparsed) }) { }
     }
 }

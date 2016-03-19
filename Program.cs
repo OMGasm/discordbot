@@ -19,7 +19,16 @@ namespace discordbot
             DiscordClient client = new DiscordClient();
             client.ExecuteAndWait(async () =>
             {
-                Auth.token = await client.Connect(Auth.email, Auth.password);
+                if (Auth.loadToken())
+                {
+                    Console.WriteLine("Logging in...");
+                    await client.Connect(Auth.token);
+                }
+                else
+                {
+                    Auth.token = await client.Connect(Auth.email, Auth.password);
+                    Auth.saveToken();
+                }
                 Console.Clear();
                 client.Log.Message += async (s, e) => await Logger.log(e);
                 client.MessageReceived += async (s, e) => await Logger.log(e);

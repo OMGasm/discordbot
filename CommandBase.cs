@@ -17,7 +17,7 @@ namespace discordbot
         public KeyValuePair<string, ParameterType>[] parameters;
         public string description = null;
         public IPermissionChecker[] permissionCheckers;
-        public Func<Command, User, Channel, bool>[] permissionFuncs;
+        public virtual bool permission(Command command, User user, Channel channel) { return true; }//Func<Command, User, Channel, bool> permission
         public abstract Task action(CommandEventArgs e);
 
         void make()
@@ -31,13 +31,7 @@ namespace discordbot
                     command = command.AddCheck(check);
                 }
             }
-            if (permissionFuncs != null)
-            {
-                foreach (var check in permissionFuncs)
-                {
-                    command = command.AddCheck(check, null);
-                }
-            }
+                    command = command.AddCheck(permission, null);
             if (parameters != null)
             {
                 foreach (var kv in parameters)
@@ -62,7 +56,6 @@ namespace discordbot
             this.aliases = aliases;
             this.parameters = parameters;
             this.permissionCheckers = permissionCheckers;
-            this.permissionFuncs = permissionFuncs;
             make();
         }
 

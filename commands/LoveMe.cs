@@ -12,7 +12,14 @@ namespace discordbot.commands
     {
         public override async Task action(CommandEventArgs e)
         {
-            await e.Channel.SendMessage($"I love you {e.User.Name}! ♥");
+            if(Sexymeter.calculate(e.User.Name) >= 80)
+            {
+                await e.Channel.SendMessage($"But I already have Haru.");
+            }
+            else
+            {
+                await e.Channel.SendMessage("No.");
+            }
         }
 
         public LoveMe() : base("love me plz", "make makotoe love you") { }

@@ -14,6 +14,42 @@ namespace discordbot
         public static string token { get; set; }
         public static string password { get { return getPasswordConsole(); } }
 
+        public static void saveToken()
+        {
+            StreamWriter f = null;
+            try
+            {
+                f = new StreamWriter("token");
+                f.Write(token);
+                f.Flush();
+                f.Close();
+
+            }
+            catch (IOException e)
+            {
+                if (e == null) { }
+            }
+            finally
+            {
+                f.Close();
+                f.Dispose();
+            }
+        }
+
+        public static bool loadToken()
+        {
+            if (File.Exists("token"))
+            {
+                using (StreamReader f = new StreamReader("token"))
+                {
+                    token = f.ReadToEnd();
+                    f.Close();
+                    return true;
+                }
+            }
+            else return false;
+        }
+
         static string getEmailConsole()
         {
             Console.Write("Email: ");
