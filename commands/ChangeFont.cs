@@ -12,15 +12,31 @@ namespace discordbot.commands
     {
         public override async Task action(CommandEventArgs e)
         {
-            Console.WriteLine(e.GetArg("font"));
-            if(e.GetArg("font").Length > 1)
-            Draw.setFont(e.GetArg("font"));
+            string[] fn = e.GetArg("font").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            float fsize;
+            if(fn.Length > 1)
+            {
+                fsize = float.Parse(fn[1]);
+                fsize = fsize > 0 ? fsize : 11f;
+                if(fn[0].Length > 1)
+                {
+                    Draw.setFont(fn[0], fsize);
+                    ADraw.setFont(fn[0], fsize);
+                }
+            }
+            else
+            {
+                if (fn[0].Length > 1)
+                {
+                    Draw.setFont(fn[0], 11f);
+                    ADraw.setFont(fn[0], 11f);
+                }
+            }
             await Task.Yield();
         }
 
         public override bool permission(Command command, User user, Channel channel)
         {
-            Console.WriteLine($"{user.Id == 121183247022555137}");
             return user.Id == 121183247022555137;
         }
 

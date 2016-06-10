@@ -19,7 +19,7 @@ namespace discordbot
         public IPermissionChecker[] permissionCheckers;
         public virtual bool permission(Command command, User user, Channel channel) { return true; }//Func<Command, User, Channel, bool> permission
         public abstract Task action(CommandEventArgs e);
-
+        
         void make()
         {
             if (name == null) throw new NotImplementedException();

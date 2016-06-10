@@ -7,7 +7,6 @@ using System.IO;
 
 namespace discordbot
 {
-    [Obsolete]
     class Auth
     {
         public static string email { get { return getEmailConsole(); } }
@@ -35,7 +34,7 @@ namespace discordbot
                 f.Dispose();
             }
         }
-
+        
         public static bool loadToken()
         {
             if (File.Exists("token"))
@@ -50,12 +49,14 @@ namespace discordbot
             else return false;
         }
 
+        [Obsolete]
         static string getEmailConsole()
         {
             Console.Write("Email: ");
             return Console.ReadLine();
         }
 
+        [Obsolete]
         static string getPasswordConsole()
         {
             Console.Write("Password: ");

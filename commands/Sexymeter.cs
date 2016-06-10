@@ -25,8 +25,7 @@ namespace discordbot.commands
 
         public override async Task action(CommandEventArgs e)
         {
-            Console.WriteLine(1);
-            if (e.Message.MentionedRoles.Contains(e.Server.EveryoneRole))
+            if (e.Message.MentionedRoles.Any())
             {
                 await e.Channel.SendMessage($"I don't like you anymore, {e.User.Name}.");
                 return;

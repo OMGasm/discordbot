@@ -11,12 +11,14 @@ namespace discordbot
 {
     class Program
     {
+        private static DiscordClient _client = new DiscordClient();
+        internal static DiscordClient client => _client;
 
         static void Main(string[] args)
         {
-            Console.CancelKeyPress += (s, e) => Environment.Exit(0);
+            Console.CancelKeyPress += (s, e) => { client.Disconnect(); Environment.Exit(0); };
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => client.Disconnect();
             Console.OutputEncoding = Encoding.Unicode;
-            DiscordClient client = new DiscordClient();
             client.ExecuteAndWait(async () =>
             {
                 if (Auth.loadToken())
@@ -32,17 +34,12 @@ namespace discordbot
                 Console.Clear();
                 client.Log.Message += async (s, e) => await Logger.log(e);
                 client.MessageReceived += async (s, e) => await Logger.log(e);
-                if (!client.Servers.Any())
-                {
-                    Console.WriteLine("No available servers.");
-                    return;
-                }
                 client.UsingCommands(conf =>
                 {
                     conf.AllowMentionPrefix = true;
                     conf.PrefixChar = null;
                 });
-                Commands.init(client.Services.Get<CommandService>());
+                Commands.init(client.GetService<CommandService>());
             });
         }
     }

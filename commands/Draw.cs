@@ -14,16 +14,17 @@ namespace discordbot.commands
     class Draw : CommandBase
     {
         static Font f;
+        static Color c;
 
-        internal static void setFont(string s)
+        internal static void setFont(string s, float size)
         {
             Font old = f;
             FontFamily nff;
             nff = new FontFamily(s);
             if (nff.IsStyleAvailable(FontStyle.Regular))
-                f = new Font(nff, 11f, FontStyle.Regular);
+                f = new Font(nff, size, FontStyle.Regular);
             else if (nff.IsStyleAvailable(FontStyle.Bold))
-                f = new Font(nff, 11f, FontStyle.Bold);
+                f = new Font(nff, size, FontStyle.Bold);
             else
                 f = old;
         }
@@ -31,11 +32,24 @@ namespace discordbot.commands
         public override async Task action(CommandEventArgs e)
         {
             if (e.Args.Length == 0) return;
-            Size s = TextRenderer.MeasureText(e.GetArg("text"), f, new Size(500, 1000), TextFormatFlags.NoPrefix | TextFormatFlags.WordBreak);
+            string str = e.GetArg("text");
+
+            const int len = 79;
+            for (int i = 0, c = 0; i < str.Length; i++, c++)
+            {
+                if (str[i] == '\n') c = 0;
+                if (c == len)
+                {
+                    str = str.Substring(0, i) + '\n' + str.Substring(i, str.Length - i);
+                    c = 0;
+                }
+            }
+
+            Size s = TextRenderer.MeasureText(str, f);
             Bitmap b = new Bitmap(s.Width, s.Height, PixelFormat.Format32bppArgb);
             Graphics g = Graphics.FromImage(b);
             g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-            g.DrawString(e.GetArg("text")+'\n', f, new SolidBrush(Color.FromArgb(0, 137, 255)), new Rectangle(0,0, s.Width,s.Height), new StringFormat(StringFormatFlags.FitBlackBox));
+            g.DrawString(str, f, new SolidBrush(c), 0, 0);
             g.Flush();
             var stream = new MemoryStream();
             b.Save(stream, ImageFormat.Png);
@@ -59,6 +73,7 @@ namespace discordbot.commands
                 //new FontFamily("Arial")
             };
             f = new Font(fonts.First(font => font.IsStyleAvailable(FontStyle.Regular)), 11f, FontStyle.Regular);
+            c = Color.FromArgb(0, 137, 255);
         }
     }
 }

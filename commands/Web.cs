@@ -18,16 +18,21 @@ namespace discordbot.commands
         {
             await Task.Yield();
             ChromiumWebBrowser br = new ChromiumWebBrowser(e.GetArg("site"));
-            br.Size = new Size(1024, 768);
+            //br.Size = new Size(1024, 768);
             EventHandler<CefSharp.LoadingStateChangedEventArgs> handler = null;
             handler = new EventHandler<CefSharp.LoadingStateChangedEventArgs>(async (s, ev) =>
             {
                 if (!ev.IsLoading)
                 {
-                    await Task.Delay(1000);
                     br.LoadingStateChanged -= handler;
+                    await Task.Delay(1000);
                     Bitmap b = await  br.ScreenshotAsync();
-                    if (b == null) return;
+                    if (b == null)
+                    {
+                        b.Dispose();
+                        br.Dispose();
+                        return;
+                    }
                     MemoryStream stream = new MemoryStream();
                     b.Save(stream, ImageFormat.Png);
                     stream.Position = 0;
@@ -37,21 +42,6 @@ namespace discordbot.commands
                 }
             });
             br.LoadingStateChanged += handler;
-        }
-
-        private ImageCodecInfo GetEncoder(ImageFormat format)
-        {
-
-            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
-
-            foreach (ImageCodecInfo codec in codecs)
-            {
-                if (codec.FormatID == format.Guid)
-                {
-                    return codec;
-                }
-            }
-            return null;
         }
 
         public override bool permission(Command command, User user, Channel channel)
