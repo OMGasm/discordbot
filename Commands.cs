@@ -32,6 +32,7 @@ namespace discordbot
             commands.Add(new ADraw());
             commands.Add(new JPEGify());
             commands.Add(new Info());
+            commands.Add(new QR());
         }
 
         internal static void addCommand(CommandBase command)
