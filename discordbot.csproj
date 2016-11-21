@@ -181,11 +181,9 @@
     <Compile Include="commands\8ball.cs" />
     <Compile Include="commands\Audio.cs" />
     <Compile Include="commands\ChangeFont.cs" />
-    <Compile Include="commands\Dotdot.cs" />
     <Compile Include="commands\Info.cs" />
     <Compile Include="commands\JPEGify.cs" />
     <Compile Include="commands\LoveMe.cs" />
-    <Compile Include="commands\Lua.cs" />
     <Compile Include="commands\Play.cs" />
     <Compile Include="commands\Draw.cs" />
     <Compile Include="commands\QR.cs" />
