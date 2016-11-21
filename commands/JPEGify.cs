@@ -8,6 +8,7 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Net;
+using System.Text.RegularExpressions;
 namespace discordbot.commands
 {
     class JPEGify : CommandBase
@@ -43,10 +44,22 @@ namespace discordbot.commands
         {
             double compression;
             string url = null;
+            Regex r = new Regex("<@!?([0-9]+)>");
+            
             if (e.GetArg("level").ToLower().Equals("me"))
             {
                 url = e.User.AvatarUrl;
                 compression = 2 * Math.Log(Sexymeter.calculate(e.User.Name), 1.2);
+            }
+            else if(r.IsMatch(e.GetArg("level")))
+            {
+                Discord.User[] users = e.Message.MentionedUsers.ToArray();
+                if (users.Length == 1)
+                {
+                    url = users[0].AvatarUrl;
+                    compression = 2 * Math.Log(Sexymeter.calculate(users[0].Name), 1.2);
+                }
+                else return;
             }
             else if (e.GetArg("level").ToLower().Equals("yourself"))
             {

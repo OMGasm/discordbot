@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.Modules;
-
+using Discord.Audio;
 namespace discordbot
 {
     class Program
@@ -17,7 +17,6 @@ namespace discordbot
         static void Main(string[] args)
         {
             Console.CancelKeyPress += (s, e) => { client.Disconnect(); Environment.Exit(0); };
-            AppDomain.CurrentDomain.ProcessExit += (s, e) => client.Disconnect();
             Console.OutputEncoding = Encoding.Unicode;
             client.ExecuteAndWait(async () =>
             {
@@ -37,9 +36,10 @@ namespace discordbot
                 client.UsingCommands(conf =>
                 {
                     conf.AllowMentionPrefix = true;
-                    conf.PrefixChar = null;
+                    conf.CustomPrefixHandler = (Message m) => m.RawText.StartsWith("\\.") && !m.RawText.StartsWith("\\. ") ? 2 : -1;
                 });
                 Commands.init(client.GetService<CommandService>());
+                client.UsingAudio(x => x.Mode = AudioMode.Outgoing);
             });
         }
     }

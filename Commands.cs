@@ -29,10 +29,11 @@ namespace discordbot
             commands.Add(new Draw());
             commands.Add(new ChangeFont());
             commands.Add(new Web());
-            commands.Add(new ADraw());
             commands.Add(new JPEGify());
             commands.Add(new Info());
             commands.Add(new QR());
+            commands.Add(new _8ball());
+            commands.Add(new Lua());
         }
 
         internal static void addCommand(CommandBase command)

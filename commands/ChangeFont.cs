@@ -21,7 +21,6 @@ namespace discordbot.commands
                 if(fn[0].Length > 1)
                 {
                     Draw.setFont(fn[0], fsize);
-                    ADraw.setFont(fn[0], fsize);
                 }
             }
             else
@@ -29,7 +28,6 @@ namespace discordbot.commands
                 if (fn[0].Length > 1)
                 {
                     Draw.setFont(fn[0], 11f);
-                    ADraw.setFont(fn[0], 11f);
                 }
             }
             await Task.Yield();
