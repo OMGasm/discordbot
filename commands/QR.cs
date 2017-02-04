@@ -7,32 +7,23 @@ using Discord.Commands;
 using System.IO;
 using ZXing;
 
-namespace discordbot.commands
+namespace Bot.commands
 {
-    class QR : CommandBase
+    public class QR : ModuleBase
     {
-        public override async Task action(CommandEventArgs e)
+        public async Task action(string target)
         {
-            string s = e.GetArg("target");
-            if (s.Equals("")) return;
-            else await Task.Yield();
-
-            BarcodeWriter bw = new BarcodeWriter
+            BarcodeWriter bw = new BarcodeWriter()
             {
-                Format = BarcodeFormat.QR_CODE
+                 Format = BarcodeFormat.QR_CODE
             };
             using (var stream = new MemoryStream())
-            using (var bitmap = bw.Write(s))
+            using (var bitmap = bw.Write(target))
             {
                 bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
                 stream.Position = 0;
-                await e.Channel.SendFile("qr.png", stream);
+                await Context.Channel.SendFileAsync(stream, "qr.png");
             }
         }
-
-        public QR() : base("qr", 
-            parameters: new KeyValuePair<string, ParameterType>[] 
-            { new KeyValuePair<string, ParameterType>("target", ParameterType.Unparsed) })
-        { }
     }
 }

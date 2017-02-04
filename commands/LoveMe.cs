@@ -4,24 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
-using Discord.Commands.Permissions;
 
-namespace discordbot.commands
+namespace Bot.commands
 {
-    class LoveMe : CommandBase
+    public class LoveMe : ModuleBase
     {
-        public override async Task action(CommandEventArgs e)
+        [Command("love me plz"), Summary("Try to get makotoe to love you")]
+        public async Task action()
         {
-            if(Sexymeter.calculate(e.User.Name) >= 80)
+            if(Sexymeter.calculate(Context.User.Username) >= 80)
             {
-                await e.Channel.SendMessage($"But I already have Haru.");
+                await ReplyAsync($"But I already have Haru.");
             }
             else
             {
-                await e.Channel.SendMessage("No.");
+                await ReplyAsync("No.");
             }
         }
-
-        public LoveMe() : base("love me plz", "make makotoe love you") { }
     }
 }

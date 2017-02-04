@@ -3,34 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 
-namespace discordbot.commands
+namespace Bot.commands
 {
-    class Info : CommandBase
+    public class Info : ModuleBase
     {
-        public override async Task action(CommandEventArgs e)
+        [Command("info"), Summary("Gets info of the bot or you")]
+        public async Task action([Remainder]string user = "")
         {
-            if (e.GetArg("user") == "")
+            if (user == "")
             {
-                await e.Channel.SendMessage($"```Makotoe Discord bot version 0.3a.\n" +
-                    $"Running with Discord.Net { "0.9.1" } on { Environment.OSVersion }.\n" +
+                await ReplyAsync($"```Makotoe Discord bot version 0.4a.\n" +
+                    $"Running with Discord.Net 1.0.X on { Environment.OSVersion }.\n" +
                     $"Current heap usage: { GC.GetTotalMemory(false) / (1024.0 * 1024.0):0.00}MB.\n" +
                     $"Owned and operated by { /* TODO: get owner from config */ "OMGasm (121183247022555137)" }.```");
             }
-            else if (e.GetArg("user").ToLower().Equals("me"))
+            else if (user.Equals("me"))
             {
-                await e.Channel.SendMessage($"```text\n{e.User.Name.Replace("`", "\\`")} ({e.User.Id})\nJoined: {e.User.JoinedAt}```{e.User.AvatarUrl}");
+                await ReplyAsync($"```text\n{((Context.User as IGuildUser).Nickname ?? Context.User.Username).Replace("`", "\\`")} ({Context.User.Id})\nJoined: {(Context.User as IGuildUser).JoinedAt}```{Context.User.AvatarUrl}");
             }
-            else if (e.Message.MentionedUsers.Count() > 0)
+            else if (Context.Message.MentionedUserIds.Count() > 0)
             {
-                await e.Channel.SendMessage($"```text\n{e.Message.MentionedUsers.First().Name.Replace("`", "\\`")} ({e.Message.MentionedUsers.First().Id})\nJoined: {e.Message.MentionedUsers.First().JoinedAt}```{e.Message.MentionedUsers.First().AvatarUrl}");
+                var mentioned = await Context.Guild.GetUserAsync(Context.Message.MentionedUserIds.First());
+                await ReplyAsync($"```text\n{mentioned.Nickname?.Replace("`", "\\`")} ({mentioned.Id})\nJoined: {mentioned.JoinedAt}```{mentioned.AvatarUrl}");
             }
         }
-
-        public Info() : base("info",
-            parameters: new KeyValuePair<string, ParameterType>[] 
-            { new KeyValuePair<string, ParameterType>("user", ParameterType.Optional) })
-        { }
     }
 }

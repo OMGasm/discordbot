@@ -10,49 +10,37 @@ using System.IO;
 using System.Drawing.Imaging;
 using CefSharp.OffScreen;
 
-namespace discordbot.commands
+namespace Bot.commands
 {
-    class Web : CommandBase
+    public class Web : ModuleBase
     {
-        public override async Task action(CommandEventArgs e)
+        public async Task action([Remainder]string site)
         {
-            await Task.Yield();
-            ChromiumWebBrowser br = new ChromiumWebBrowser(e.GetArg("site"));
+            if (site == "") return;
+            await Task.Delay(0);
+            ChromiumWebBrowser br = new ChromiumWebBrowser(site);
             //br.Size = new Size(1024, 768);
             EventHandler<CefSharp.LoadingStateChangedEventArgs> handler = null;
             handler = new EventHandler<CefSharp.LoadingStateChangedEventArgs>(async (s, ev) =>
             {
-                if (!ev.IsLoading)
+                while (ev.IsLoading) await Task.Delay(100);
                 {
                     br.LoadingStateChanged -= handler;
-                    await Task.Delay(1000);
-                    Bitmap b = await  br.ScreenshotAsync();
+                    Bitmap b = await br.ScreenshotAsync();
                     if (b == null)
                     {
-                        b.Dispose();
                         br.Dispose();
                         return;
                     }
                     MemoryStream stream = new MemoryStream();
                     b.Save(stream, ImageFormat.Png);
                     stream.Position = 0;
-                    await e.Channel.SendFile("web.png", stream);
+                    await Context.Channel.SendFileAsync(stream, "web.png");
                     b.Dispose();
                     br.Dispose();
                 }
             });
             br.LoadingStateChanged += handler;
         }
-
-        public override bool permission(Command command, User user, Channel channel)
-        {
-            return user.Id == 121183247022555137;
-        }
-
-        public Web() : base("web", parameters: new KeyValuePair<string, ParameterType>[]
-            {
-                new KeyValuePair<string, ParameterType>("site", ParameterType.Required)
-            })
-        { }
     }
 }

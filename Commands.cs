@@ -6,51 +6,36 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using discordbot.commands;
-namespace discordbot
+using Discord.WebSocket;
+namespace Bot
 {
     class Commands
     {
-        internal static CommandService service;
-        static List<CommandBase> commands;
+        private static CommandService commands;
+        private static DependencyMap map;
 
-        static Commands()
+        public static async Task InstallCommands()
         {
-            commands = new List<CommandBase>();
+            map = new DependencyMap();
+            map.Add(Bot.Client);
+            commands = new CommandService();
+            Bot.Client.MessageReceived += HandleCommand;
+            await commands.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 
-        internal static void init(CommandService _service)
+        public static async Task HandleCommand(SocketMessage smsg)
         {
-            service = _service;
-            CefSharp.Cef.Initialize(new CefSharp.CefSettings(), shutdownOnProcessExit: true, performDependencyCheck: true);
-            commands.Add(new Sexymeter());
-            commands.Add(new LoveMe());
-            commands.Add(new Play());
-            commands.Add(new Draw());
-            commands.Add(new ChangeFont());
-            commands.Add(new Web());
-            commands.Add(new JPEGify());
-            commands.Add(new Info());
-            commands.Add(new QR());
-            commands.Add(new _8ball());
-            commands.Add(new Lua());
-        }
-
-        internal static void addCommand(CommandBase command)
-        {
-            commands.Add(command);
-        }
-
-        internal static void load(string cmd)
-        {
-            Assembly asm = Assembly.LoadFrom("commands/" + cmd);
-            foreach(Type T in asm.GetTypes())
-            {
-                if(T.BaseType == typeof(CommandBase))
-                {
-                    commands.Add((CommandBase)Activator.CreateInstance(T));
-                }
-            }
+            var msg = smsg as SocketUserMessage;
+            int pos = 0;
+            if (msg == null)
+                return;
+            if (!(msg.HasStringPrefix(@"\.", ref pos) || msg.HasMentionPrefix(Bot.Client.CurrentUser, ref pos)))
+                return;
+            var context = new CommandContext(Bot.Client, msg);
+            var result = await commands.ExecuteAsync(context, pos, map);
+            if (!result.IsSuccess)
+                if(result.Error == CommandError.Exception)
+                await context.Channel.SendMessageAsync(result.ErrorReason);
         }
     }
 }

@@ -6,25 +6,15 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 
-namespace discordbot.commands
+namespace Bot.commands
 {
-    class Play : CommandBase
+    public class Play : ModuleBase
     {
-        string game;
-
-        public override async Task action(CommandEventArgs e)
+        [RequireOwner]
+        [Command("play"), Summary("Set playing status")]
+        public async Task action(string game, string streamurl = null)
         {
-            game = e.GetArg("game");
-            e.Channel.Client.SetGame(game);
-            e.Channel.Client.GatewaySocket.Connected += (s, ev) => e.Channel.Client.SetGame(game);
-            await Task.Yield();
+            await Bot.Client.SetGameAsync(game, streamurl, streamurl == null ? StreamType.NotStreaming : StreamType.Twitch);
         }
-
-        public override bool permission(Command command, User user, Channel channel)
-        {
-            return user.Id == 121183247022555137;
-        }
-
-        public Play() : base("play", "play a game", null, new KeyValuePair<string, ParameterType>[] { new KeyValuePair<string, ParameterType>("game", ParameterType.Unparsed) }) { }
     }
 }

@@ -7,11 +7,10 @@ using System.Security.Cryptography;
 using System.Numerics;
 using Discord;
 using Discord.Commands;
-using Discord.Commands.Permissions;
 
-namespace discordbot.commands
+namespace Bot.commands
 {
-    class Sexymeter : CommandBase
+    public class Sexymeter : ModuleBase
     {
         public static float calculate(string name)
         {
@@ -23,22 +22,48 @@ namespace discordbot.commands
             return (float)(bigint % 1001) / 10.0f;
         }
 
-        public override async Task action(CommandEventArgs e)
+        [Command("sexymeter"), Summary("Check how sexy you are")]
+        public async Task action([Remainder] string name = "")
         {
-            if (e.Message.MentionedRoles.Any())
+            ulong id;
+            string nick = null;
+            IEnumerable<IGuildUser> users = null;
+            if (name == "")
             {
-                await e.Channel.SendMessage($"I don't like you anymore, {e.User.Name}.");
-                return;
+                name = Context.User.Username;
+                nick = (Context.User as IGuildUser)?.Nickname ?? name;
             }
-            string name = (e.GetArg("name") != "" ? e.GetArg("name") : e.User.Name);
-            float sexyness = calculate(name);
-            await e.Channel.SendMessage(string.Format("{0} is {1:0.0}% sexy.{2}", name, sexyness, ((sexyness >= 80) ? " Dayumn." : "")));
-        }
+            else if (MentionUtils.TryParseUser(name, out id))
+            {
+                var user = await Context.Channel.GetUserAsync(id);
+                name = user.Username;
+                nick = (user as IGuildUser)?.Nickname ?? name;
+            }
+            else if ((users = (await Context.Guild.GetUsersAsync())
+                .Where(x => x.Username == name || x.Nickname == name)).Any())
+            {
+                if (users.Any(x => x.Id == Context.User.Id))
+                {
+                    name = Context.User.Username;
+                    nick = (Context.User as IGuildUser)?.Nickname ?? name;
+                }
+                else if (users.Any(x => x.Status == UserStatus.Online))
+                {
+                    //name 
 
-        public Sexymeter() : base("sexymeter",
-                "Measures sexyness.",
-                null, new KeyValuePair<string, ParameterType>[]
-                    { new KeyValuePair<string, ParameterType>("name", ParameterType.Unparsed) })
-        { }
+                }
+            }
+            /*else if(MentionUtils.TryParseRole(name, out id))
+            {
+                name = Context.Guild.GetRole(id).Name;
+            }
+            else if(MentionUtils.TryParseChannel(name, out id))
+            {
+                name = (await Context.Guild.GetChannelAsync(id)).Name;
+            }*/
+            //name = name != "" ? name : Context.User.Username;
+            float sexyness = calculate(name);
+            await ReplyAsync($"{name} is {sexyness:0.0}% sexy{(sexyness >= 80 ? ", Dayumn." : "")}");
+        }
     }
 }

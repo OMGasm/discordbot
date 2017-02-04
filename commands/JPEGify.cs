@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Discord.Commands;
 using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Net;
 using System.Text.RegularExpressions;
-namespace discordbot.commands
+using Discord.Commands;
+
+namespace Bot.commands
 {
-    class JPEGify : CommandBase
+    public class JPEGify : ModuleBase
     {
-        private async Task jpegify(CommandEventArgs e, long compression, Stream image)
+        private async Task jpegify(ICommandContext context, long compression, Stream image)
         {
             Bitmap b = new Bitmap(image);
             image.Close();
@@ -22,7 +23,7 @@ namespace discordbot.commands
             p.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, compression);
             b.Save(stream, GetEncoder(ImageFormat.Jpeg), p);
             stream.Position = 0;
-            await e.Channel.SendFile("jpegged.jpg", stream);
+            await context.Channel.SendFileAsync(stream, "jpegged.jpg");
         }
 
         private ImageCodecInfo GetEncoder(ImageFormat format)
@@ -40,33 +41,30 @@ namespace discordbot.commands
             return null;
         }
 
-        public override async Task action(CommandEventArgs e)
+        [Command("jpegify"), Summary("Do I look like I know what a jay-peg is?")]
+        public async Task action(string level = "", string image = "")
         {
             double compression;
             string url = null;
             Regex r = new Regex("<@!?([0-9]+)>");
-            
-            if (e.GetArg("level").ToLower().Equals("me"))
+            ulong userid;
+            if (level.Equals("me"))
             {
-                url = e.User.AvatarUrl;
-                compression = 2 * Math.Log(Sexymeter.calculate(e.User.Name), 1.2);
+                url = Context.User.AvatarUrl;
+                compression = 2 * Math.Log(Sexymeter.calculate(Context.User.Username), 1.2);
             }
-            else if(r.IsMatch(e.GetArg("level")))
+            else if (Discord.MentionUtils.TryParseUser(level, out userid))
             {
-                Discord.User[] users = e.Message.MentionedUsers.ToArray();
-                if (users.Length == 1)
-                {
-                    url = users[0].AvatarUrl;
-                    compression = 2 * Math.Log(Sexymeter.calculate(users[0].Name), 1.2);
-                }
-                else return;
+                Discord.IGuildUser user = await Context.Guild.GetUserAsync(userid);
+                url = user.AvatarUrl;
+                compression = 2 * Math.Log(Sexymeter.calculate(user.Username), 1.2);
             }
-            else if (e.GetArg("level").ToLower().Equals("yourself"))
+            else if (level.ToLower().Equals("yourself"))
             {
-                url = Program.client.CurrentUser.AvatarUrl;
-                compression = 2 * Math.Log(Sexymeter.calculate(e.User.Name), 1.2);
+                url = Bot.Client.CurrentUser.AvatarUrl;
+                compression = 2 * Math.Log(Sexymeter.calculate(Context.User.Username), 1.2);
             }
-            else if (!double.TryParse(e.GetArg("level"), out compression))
+            else if (!double.TryParse(level, out compression))
             {
                 return;
             }
@@ -74,16 +72,16 @@ namespace discordbot.commands
 
             if (url == null)
             {
-                if (e.GetArg("image") == "")
+                if (image == "")
                 {
-                    if (e.Message.Attachments.Length > 0)
+                    if (Context.Message.Attachments.Count > 0)
                     {
-                        url = e.Message.Attachments[0].Url;
+                        url = Context.Message.Attachments.First().Url;
                     }
-                    else if (e.Message.Embeds.Length > 0)
+                    else if (Context.Message.Embeds.Count > 0)
                     {
-                        if (e.Message.Embeds[0].Type.ToLower().Equals("image"))
-                            url = e.Message.Embeds[0].Url;
+                        if (Context.Message.Embeds.First().Type.ToLower().Equals("image"))
+                            url = Context.Message.Embeds.First().Url;
                         else return;
                     }
                     else
@@ -93,16 +91,15 @@ namespace discordbot.commands
                 }
                 else
                 {
-                    url = e.GetArg("image");
+                    url = image;
                 }
             }
-
             WebRequest wr = WebRequest.CreateHttp(url);
             url = null;
             WebResponse re = await wr.GetResponseAsync();
-            if(re.ContentLength>0)
+            if (re.ContentLength > 0)
             {
-                switch(re.ContentType)
+                switch (re.ContentType)
                 {
                     case "image/bmp":
                     case "image/x-windows-bmp":
@@ -110,7 +107,7 @@ namespace discordbot.commands
                     case "image/jpeg":
                     case "image/png":
                         {
-                            await jpegify(e, (long)Math.Round(compression), re.GetResponseStream());
+                            await jpegify(Context, (long)Math.Round(compression), re.GetResponseStream());
                             re.Dispose();
                             break;
                         }
@@ -122,12 +119,5 @@ namespace discordbot.commands
                 }
             }
         }
-
-        public JPEGify() : base("jpegify",
-            "Make pro 1965 JPEG images",
-            parameters: new KeyValuePair<string, ParameterType>[] {
-                new KeyValuePair<string, ParameterType>("level", ParameterType.Required),
-                new KeyValuePair<string, ParameterType>("image", ParameterType.Optional) })
-        { }
     }
 }
