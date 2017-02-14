@@ -19,14 +19,14 @@ namespace Bot
         async Task Run(string[] args)
         {
             Console.WriteLine("Loading...");
-            Config cfg = await Config.Load("config.json");
-
+            //Config cfg = await Config.Load("config.json");
+            Config cfg = new Config() { token = System.IO.File.ReadAllText("token"), bot = true };
             AppDomain.CurrentDomain.UnhandledException += async (s, e) =>
                 await Logger.Log(new LogMessage(LogSeverity.Critical, "unhandled exception", "unhandled exception", e.ExceptionObject as Exception));
             _client = new DiscordSocketClient();
             Client.MessageReceived += e => Logger.Message(e);
             Client.Log += e => Logger.Log(e);
-            await Commands.InstallCommands();
+            await CommandHandler.InstallCommands();
 
             Console.WriteLine("Logging in...");
             await Client.LoginAsync(TokenType.Bot, cfg.token);
