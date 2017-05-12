@@ -22,47 +22,27 @@ namespace Bot.commands
             return (float)(bigint % 1001) / 10.0f;
         }
 
+        [Priority(1)]
+        [Command("sexymeter"), Summary("Check how sexy you are")]
+        public async Task action(IUser user)
+        {
+            string sexyname = user.Username;
+            string name = (user as IGuildUser)?.Nickname ?? sexyname;
+            float sexyness = calculate(sexyname);
+            await ReplyAsync($"{name} is {sexyness:0.0}% sexy{(sexyness >= 80 ? ", Dayumn." : "")}");
+        }
+
+        [Priority(2)]
         [Command("sexymeter"), Summary("Check how sexy you are")]
         public async Task action([Remainder] string name = "")
         {
-            ulong id;
-            string nick = null;
-            IEnumerable<IGuildUser> users = null;
+            string sexyname = name;
             if (name == "")
             {
-                name = Context.User.Username;
-                nick = (Context.User as IGuildUser)?.Nickname ?? name;
+                sexyname = Context.Message.Author.Username;
+                name = (Context.Message.Author as IGuildUser)?.Nickname ?? sexyname;
             }
-            else if (MentionUtils.TryParseUser(name, out id))
-            {
-                var user = await Context.Channel.GetUserAsync(id);
-                name = user.Username;
-                nick = (user as IGuildUser)?.Nickname ?? name;
-            }
-            else if ((users = (await Context.Guild.GetUsersAsync())
-                .Where(x => x.Username == name || x.Nickname == name)).Any())
-            {
-                if (users.Any(x => x.Id == Context.User.Id))
-                {
-                    name = Context.User.Username;
-                    nick = (Context.User as IGuildUser)?.Nickname ?? name;
-                }
-                else if (users.Any(x => x.Status == UserStatus.Online))
-                {
-                    //name 
-
-                }
-            }
-            /*else if(MentionUtils.TryParseRole(name, out id))
-            {
-                name = Context.Guild.GetRole(id).Name;
-            }
-            else if(MentionUtils.TryParseChannel(name, out id))
-            {
-                name = (await Context.Guild.GetChannelAsync(id)).Name;
-            }*/
-            //name = name != "" ? name : Context.User.Username;
-            float sexyness = calculate(name);
+            float sexyness = calculate(sexyname);
             await ReplyAsync($"{name} is {sexyness:0.0}% sexy{(sexyness >= 80 ? ", Dayumn." : "")}");
         }
     }

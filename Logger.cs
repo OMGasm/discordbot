@@ -51,13 +51,24 @@ namespace Bot
         public static async Task Message(SocketMessage message)
         {
             var channel = message.Channel as SocketGuildChannel;
-            string msg;
+            string time = message.Timestamp.ToString("dd/MM/yyyy H:mm:ss");
+            string msg = message.ToString().Replace("\u0007", "").Replace("\u2022", "");
+            string user;
+            string formattedMsg;
+            string discrim = message.Author.Discriminator;
             if (channel == null)
-                msg = $"{message.Timestamp.ToString("dd/MM/yyyy H:mm:ss")} DM @ {message.Author.Username}#{message.Author.Discriminator}: {message}";
+            {
+                user = message.Author.Username;
+                formattedMsg = $"{time} DM @ {user}#{discrim}: {msg}";
+            }
             else
-                msg = $"{message.Timestamp.ToString("dd/MM/yyyy H:mm:ss")} {(message.Channel as SocketGuildChannel).Guild.Name} #{message.Channel.Name} @ {((message.Author as SocketGuildUser).Nickname == null ? message.Author.Username : (message.Author as SocketGuildUser).Nickname + " " + message.Author.Username)}: {message}";
-            Console.WriteLine(msg);
-            await swmsg.WriteLineAsync(msg);
+            {
+                string guild = channel.Guild.Name;
+                user = (message.Author as IGuildUser)?.Nickname ?? message.Author.Username;
+                formattedMsg = $"{time} {guild} #{channel.Name} @ {user}: {msg}";
+            }
+            Console.WriteLine(formattedMsg);
+            await swmsg.WriteLineAsync(formattedMsg);
             await swmsg.FlushAsync();
         }
     }

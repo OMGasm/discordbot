@@ -14,6 +14,8 @@ namespace Bot.commands
 {
     public class Web : ModuleBase
     {
+        [RequireOwner]
+        [Command("web"), Summary("Render web page")]
         public async Task action([Remainder]string site)
         {
             if (site == "") return;

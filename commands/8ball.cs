@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
 
@@ -9,7 +6,7 @@ namespace Bot.commands
 {
     public class _8ball : ModuleBase
     {
-        string[] answers = {
+        static string[] answers = {
             "It is certain",
             "It is decidedly so",
             "Without a doubt",
@@ -30,7 +27,7 @@ namespace Bot.commands
             "My sources say no",
             "Outlook not so good",
             "Very doubtful" };
-        Random r = new Random();
+        static Random r = new Random();
 
         [Command("8ball"), Summary("Magic 8 ball")]
         [Alias("does", "did", "is", "are", "was", "will", "am")]
